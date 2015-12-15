@@ -1,0 +1,13 @@
+{
+    "name": "logitrail/logitrail",
+    "type": "library",
+    "description": "Logitrail PHP Library",
+    "autoload": {
+        "psr-0": { "": "src/" }
+    },
+    "require": {
+        "php": ">=5.5",
+        "guzzlehttp/guzzle": "~5.0",
+        "ext-mcrypt": "*"
+    }
+}
