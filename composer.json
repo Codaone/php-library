@@ -2,12 +2,19 @@
     "name": "logitrail/logitrail",
     "type": "library",
     "description": "Logitrail PHP Library",
+    "license": "MIT",
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": { "Logitrail\\Lib\\": "lib/" }
     },
     "require": {
         "php": ">=5.5",
         "guzzlehttp/guzzle": "~5.0",
         "ext-mcrypt": "*"
-    }
+    },
+    "authors": [
+        {
+            "name": "Ville Mattila",
+            "email": "ville@logitrail.com"
+        }
+    ]
 }
