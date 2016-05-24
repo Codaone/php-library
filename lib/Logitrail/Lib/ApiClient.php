@@ -44,7 +44,7 @@ class ApiClient { // implements ApiClientInterface {
         $this->city = $city;
     }
 
-    public function doCheckout() {
+    public function getForm() {
         $post = array();
 
         $post['merchant'] = $this->merchantId;
@@ -69,34 +69,15 @@ class ApiClient { // implements ApiClientInterface {
         $mac = $this->calculateMac($post, $this->secretKey);
         $post['mac'] = $mac;
 
-        $cred = ''; // sprintf("Authorization: Basic %s\r\n", base64_encode('M-'.$this->merchantId.':'.$this->secretKey) );
+        $form = '<form id="form" method="post" action="' . $this->url . '">';
 
-        // use key 'http' even if you send the request to https://...
-        $options = array(
-            'http' => array(
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n".$cred,
-                'method'  => 'POST',
-                'content' => http_build_query($post)
-            )
-        );
+        foreach($post as $name => $value) {
+            $form .= '<input type="hidden" name="'.$name.'" value="'.$value.'" />';
+        }
 
-        $context  = stream_context_create($options);
-//        $result = file_get_contents($this->domain, false, $context);
-        //if ($result === FALSE) { /* Handle error */ }
-
-
-        $ch = curl_init($this->url);
-
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        //var_dump('res', $result);
-        echo $response;
-
+        $form .= '</form>';
+        $form .= "<script>document.getElementById('form').submit();</script>";
+        return $form;
     }
 
     private function calculateMac($requestValues, $secretKey) {
