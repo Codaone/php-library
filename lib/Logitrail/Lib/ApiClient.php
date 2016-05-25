@@ -82,15 +82,33 @@ class ApiClient { // implements ApiClientInterface {
         return $form;
     }
 
-    public function confirmOrder($orderId) {
+    public function updateOrder($logitrailOrderId, $data) {
+        return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId, $data);
+    }
+
+    public function confirmOrder($logitrailOrderId) {
+        return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId . '/_confirm');
+    }
+
+    private function doPost($url, $data = false) {
         // TODO: Check that merchId and secret are set
         $auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
-        $ch = curl_init($this->apiUrl . 'orders/574457623e250dc15c8b45b5/_confirm');
+        $ch = curl_init($url);
 
-        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($ch, CURLOPT_USERPWD, $auth);
+
+        if(is_array($data)) {
+            $postData = json_encode($data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($postData))
+            );
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        }
 
         $response = curl_exec($ch);
 
