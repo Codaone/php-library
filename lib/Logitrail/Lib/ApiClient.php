@@ -17,8 +17,8 @@ class ApiClient { // implements ApiClientInterface {
 
     private $products = array();
 
-    private $url = 'http://checkout.test.logitrail.com/go';
-
+    private $checkoutUrl = 'http://checkout.test.logitrail.com/go';
+    private $apiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
 
     public function addProduct($id, $name, $amount, $weight, $price, $taxPct) {
         $this->products[] = array('id' => $id, 'name' => $name, 'amount' => $amount, 'weight' => $weight, 'price' => $price, 'taxPct' => $taxPct);
@@ -45,6 +45,8 @@ class ApiClient { // implements ApiClientInterface {
     }
 
     public function getForm() {
+
+        // TODO: Check that all mandatory values are set
         $post = array();
 
         $post['merchant'] = $this->merchantId;
@@ -69,7 +71,7 @@ class ApiClient { // implements ApiClientInterface {
         $mac = $this->calculateMac($post, $this->secretKey);
         $post['mac'] = $mac;
 
-        $form = '<form id="form" method="post" action="' . $this->url . '">';
+        $form = '<form id="form" method="post" action="' . $this->checkoutUrl . '">';
 
         foreach($post as $name => $value) {
             $form .= '<input type="hidden" name="'.$name.'" value="'.$value.'" />';
@@ -78,6 +80,21 @@ class ApiClient { // implements ApiClientInterface {
         $form .= '</form>';
         $form .= "<script>document.getElementById('form').submit();</script>";
         return $form;
+    }
+
+    public function confirmOrder($orderId) {
+        // TODO: Check that merchId and secret are set
+        $auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
+        $ch = curl_init($this->apiUrl . 'orders/574457623e250dc15c8b45b5/_confirm');
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($ch, CURLOPT_USERPWD, $auth);
+
+        $response = curl_exec($ch);
+
+        curl_close($ch);
     }
 
     private function calculateMac($requestValues, $secretKey) {
