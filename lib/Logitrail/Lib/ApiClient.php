@@ -95,6 +95,8 @@ class ApiClient { // implements ApiClientInterface {
         $response = curl_exec($ch);
 
         curl_close($ch);
+
+        return $response;
     }
 
     private function calculateMac($requestValues, $secretKey) {
