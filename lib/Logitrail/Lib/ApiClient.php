@@ -20,9 +20,9 @@ class ApiClient {
     /**
      * Add a product to data sent to Logitrail
      *
-     * @param stign $id	    Merchant's product id
+     * @param string $id    Merchant's product id
      * @param string $name  Product name
-     * @param int $amount
+     * @param int $amount   How many pieces of product is ordered
      * @param type $weight
      * @param type $price
      * @param type $taxPct  Tax percentage
