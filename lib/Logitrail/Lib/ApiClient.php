@@ -14,8 +14,31 @@ class ApiClient {
     private $city;
     private $products = array();
 
-    private $checkoutUrl = 'http://checkout.test.logitrail.com/go';
-    private $apiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
+    private $testCheckoutUrl = 'http://checkout.test.logitrail.com/go';
+    private $testApiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
+
+    private $prodCheckoutUrl = 'http://checkout.logitrail.com/go';
+    private $prodApiUrl = 'http://api-1.logitrail.com/2015-01-01/';
+
+    private $checkoutUrl = 'http://checkout.logitrail.com/go';
+    private $apiUrl = 'http://api-1.logitrail.com/2015-01-01/';
+
+    /**
+     * Use test or production Logitrail server
+     * Default is production
+     *
+     * @param bool $useTest
+     */
+    public function useTest($useTest) {
+	if($useTest === true) {
+	    $this->checkoutUrl = $this->testCheckoutUrl;
+	    $this->apiUrl = $this->testApiUrl;
+	}
+	else {
+	    $this->checkoutUrl = $this->prodCheckoutUrl;
+	    $this->apiUrl = $this->prodApiUrl;
+	}
+    }
 
     /**
      * Add a product to data sent to Logitrail
