@@ -7,34 +7,66 @@ class ApiClient {
     private $secretKey;
 
     private $orderId;
-
     private $firstName;
     private $lastName;
     private $address;
     private $postalCode;
     private $city;
-
     private $products = array();
 
     private $checkoutUrl = 'http://checkout.test.logitrail.com/go';
     private $apiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
 
+    /**
+     * Add a product to data sent to Logitrail
+     *
+     * @param stign $id	    Merchant's product id
+     * @param string $name  Product name
+     * @param int $amount
+     * @param type $weight
+     * @param type $price
+     * @param type $taxPct  Tax percentage
+     */
     public function addProduct($id, $name, $amount, $weight, $price, $taxPct) {
         $this->products[] = array('id' => $id, 'name' => $name, 'amount' => $amount, 'weight' => $weight, 'price' => $price, 'taxPct' => $taxPct);
     }
 
+    /**
+     * Set Merchant ID used in communication with Logitrail
+     *
+     * @param string $merchantId
+     */
     public function setMerchantId($merchantId) {
         $this->merchantId = $merchantId;
     }
 
+    /**
+     * Set secret key used in communication with Logitrail
+     *
+     * @param string $secretKey
+     */
     public function setSecretKey($secretKey) {
         $this->secretKey = $secretKey;
     }
 
+    /**
+     * Set merchant's order id, which will be visible in Logitrail's system
+     *
+     * @param type $orderId
+     */
     public function setOrderId($orderId) {
         $this->orderId = $orderId;
     }
 
+    /**
+     * Set customer information and delivery address of the order
+     *
+     * @param string $firstname
+     * @param string $lastname
+     * @param string $address
+     * @param string $postalCode
+     * @param string $city
+     */
     public function setCustomerInfo($firstname, $lastname, $address, $postalCode, $city) {
         $this->firstName = $firstname;
         $this->lastName = $lastname;
@@ -43,8 +75,13 @@ class ApiClient {
         $this->city = $city;
     }
 
+    /**
+     * Returns a html form with provided data that will be automatically posted
+     * to Logitrail and which starts the delivery method selection process
+     *
+     * @return string
+     */
     public function getForm() {
-
         // TODO: Check that all mandatory values are set
         $post = array();
 
@@ -78,17 +115,38 @@ class ApiClient {
 
         $form .= '</form>';
         $form .= "<script>document.getElementById('form').submit();</script>";
+
         return $form;
     }
 
+    /**
+     * Updates data for order already in Logitrail's system.
+     *
+     * @param string $logitrailOrderId
+     * @param array $data
+     * @return JSON?
+     */
     public function updateOrder($logitrailOrderId, $data) {
         return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId, $data);
     }
 
+    /**
+     * Confirm a passive order reported earlier for delivery
+     *
+     * @param string $logitrailOrderId
+     * @return JSON?
+     */
     public function confirmOrder($logitrailOrderId) {
         return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId . '/_confirm');
     }
 
+    /**
+     * Does a post call to Logireail's system to given endpoint with optional payload
+     *
+     * @param string $url URL of the endpoint to post to
+     * @param array $data Data sent as JSON payload
+     * @return JSON?
+     */
     private function doPost($url, $data = false) {
         // TODO: Check that merchId and secret are set
         $auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
@@ -116,6 +174,14 @@ class ApiClient {
         return $response;
     }
 
+    /**
+     * Calculates the mac from order data to validate order content
+     * at Logitrail's end
+     *
+     * @param array $requestValues
+     * @param string $secretKey
+     * @return string
+     */
     private function calculateMac($requestValues, $secretKey) {
         ksort($requestValues);
 
@@ -132,6 +198,7 @@ class ApiClient {
         $macSource = join('|', $macValues);
 
         $correctMac = base64_encode(hash('sha512', $macSource, true));
+
         return $correctMac;
     }
 }
