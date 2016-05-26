@@ -2,8 +2,7 @@
 
 namespace Logitrail\Lib;
 
-class ApiClient { // implements ApiClientInterface {
-
+class ApiClient {
     private $merchantId;
     private $secretKey;
 
