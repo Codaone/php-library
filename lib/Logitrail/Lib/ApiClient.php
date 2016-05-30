@@ -168,12 +168,9 @@ class ApiClient {
 
     /**
      * Updates data for order already in Logitrail's system.
-     * Uses the format from:
-     * http://logitrail-integration.readthedocs.io/en/latest/orders/create_or_modify.html#order-json-object
      *
      * @param string $logitrailOrderId
-     * @param array $data
-     * @return JSON The response resturned by Logitrail
+     * @return array The response resturned by Logitrail
      */
     public function updateOrder($logitrailOrderId) {
 	// TODO: Check that all mandatory values are given
@@ -198,7 +195,7 @@ class ApiClient {
      * Confirm a passive order reported earlier for delivery
      *
      * @param string $logitrailOrderId
-     * @return JSON?
+     * @return array The response resturned by Logitrail
      */
     public function confirmOrder($logitrailOrderId) {
         return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId . '/_confirm');
@@ -289,7 +286,7 @@ class ApiClient {
      *
      * @param string $url URL of the endpoint to post to
      * @param array $data Data sent as JSON payload
-     * @return JSON The response resturned by Logitrail
+     * @return array The response resturned by Logitrail
      */
     private function doPost($url, $data = false) {
         // TODO: Check that merchId and secret are set
@@ -315,7 +312,7 @@ class ApiClient {
 
         curl_close($ch);
 
-        return $response;
+        return json_decode($response, true);
     }
 
     /**
