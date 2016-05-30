@@ -327,7 +327,7 @@ class ApiClient {
 
         curl_close($ch);
 
-        return json_decode($response, $this->responsesAsArray);
+        return ($this->responsesAsArray ? json_decode($response, true) : $response);
     }
 
     /**
