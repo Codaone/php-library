@@ -16,6 +16,8 @@ class ApiClient {
     private $phone;
     private $products = array();
 
+    private $responsesAsArray = false;
+
     private $testCheckoutUrl = 'http://checkout.test.logitrail.com/go';
     private $testApiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
 
@@ -40,6 +42,16 @@ class ApiClient {
 	    $this->checkoutUrl = $this->prodCheckoutUrl;
 	    $this->apiUrl = $this->prodApiUrl;
 	}
+    }
+
+    /**
+     * Return Logitrail responses raw as gotten or converted to array
+     * (Doesn't always return JSON in error cases, so converted responses may vary)
+     *
+     * @param bool $responseAsArray
+     */
+    public function setResponseAsArray($responseAsArray) {
+	$this->responseAsArray = $responseAsArray;
     }
 
     /**
@@ -315,7 +327,7 @@ class ApiClient {
 
         curl_close($ch);
 
-        return json_decode($response, true);
+        return json_decode($response, $this->responsesAsArray);
     }
 
     /**
