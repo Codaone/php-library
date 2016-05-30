@@ -289,7 +289,10 @@ class ApiClient {
      * @return array The response resturned by Logitrail
      */
     private function doPost($url, $data = false) {
-        // TODO: Check that merchId and secret are set
+	if(!$this->merchantId || !$this->secretKey) {
+	    throw new Exception('Missing merchant id or secret key');
+	}
+
         $auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
         $ch = curl_init($url);
 
