@@ -12,6 +12,8 @@ class ApiClient {
     private $address;
     private $postalCode;
     private $city;
+    private $email;
+    private $phone;
     private $products = array();
 
     private $testCheckoutUrl = 'http://checkout.test.logitrail.com/go';
@@ -46,12 +48,27 @@ class ApiClient {
      * @param string $id    Merchant's product id
      * @param string $name  Product name
      * @param int $amount   How many pieces of product is ordered
-     * @param type $weight
-     * @param type $price
+     * @param type $weight  Product weight in grams
+     * @param type $price   Price of one item of the product, including taxes
      * @param type $taxPct  Tax percentage
+     * @param string $ean   Product barcode (GTIN/EAN) (Needed in product creation only)
+     * @param int $width    Product width in millimeters (Needed in product creation only)
+     * @param int $height   Product height in millimeters (Needed in product creation only)
+     * @param int $length   Product length in millimeters (Needed in product creation only)
      */
-    public function addProduct($id, $name, $amount, $weight, $price, $taxPct) {
-        $this->products[] = array('id' => $id, 'name' => $name, 'amount' => $amount, 'weight' => $weight, 'price' => $price, 'taxPct' => $taxPct);
+    public function addProduct($id, $name, $amount, $weight, $price, $taxPct, $barcode = false, $width = false, $height = false, $length = false) {
+        $this->products[] = array(
+	    'id' => $id,
+	    'name' => $name,
+	    'barcode' => $barcode,
+	    'amount' => $amount,
+	    'weight' => $weight,
+	    'width' => $width,
+	    'height' => $height,
+	    'length' => $length,
+	    'price' => $price,
+	    'taxPct' => $taxPct
+	);
     }
 
     /**
@@ -86,16 +103,20 @@ class ApiClient {
      *
      * @param string $firstname
      * @param string $lastname
+     * @param string $phone
+     * @param string $email
      * @param string $address
      * @param string $postalCode
      * @param string $city
      */
-    public function setCustomerInfo($firstname, $lastname, $address, $postalCode, $city) {
+    public function setCustomerInfo($firstname, $lastname, $phone, $email, $address, $postalCode, $city) {
         $this->firstName = $firstname;
         $this->lastName = $lastname;
         $this->address = $address;
         $this->postalCode = $postalCode;
         $this->city = $city;
+	$this->phone = $phone;
+	$this->email = $email;
     }
 
     /**
@@ -116,6 +137,9 @@ class ApiClient {
         $post['customer_addr'] = $this->address;
         $post['customer_pc'] = $this->postalCode;
         $post['customer_city'] = $this->city;
+        $post['customer_email'] = $this->email;
+        $post['customer_phone'] = $this->phone;
+
 
         // add products to post data
         foreach($this->products as $id => $product) {
@@ -144,13 +168,30 @@ class ApiClient {
 
     /**
      * Updates data for order already in Logitrail's system.
+     * Uses the format from:
+     * http://logitrail-integration.readthedocs.io/en/latest/orders/create_or_modify.html#order-json-object
      *
      * @param string $logitrailOrderId
      * @param array $data
-     * @return JSON?
+     * @return JSON The response resturned by Logitrail
      */
-    public function updateOrder($logitrailOrderId, $data) {
-        return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId, $data);
+    public function updateOrder($logitrailOrderId) {
+	// TODO: Check that all mandatory values are given
+	// TODO: currently doesn't support updating products for the order
+	$orderData = array(
+	    'merchants_order' => $this->orderId,
+	    'customer' => array(
+		'firstName' => $this->firstName,
+		'lastName' => $this->lastName,
+		'email' => $this->email,
+		'phoneNumber' => $this->phone,
+		'address' => $this->address,
+		'city' => $this->city,
+		'postalCode' => $this->postalCode
+	    )
+	);
+
+        return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId, $orderData);
     }
 
     /**
@@ -164,11 +205,91 @@ class ApiClient {
     }
 
     /**
+     * Create products to Logitrail's system.
+     * Creates all products that were added with addProduct method and returns
+     * array of responses from Logitrail.
+     *
+     * @return array Responses from Logitrail for each added product
+     */
+    public function createProducts() {
+	// TODO: add support for subproducts
+	$results = array();
+
+	foreach($this->products as $id => $product) {
+	    $productData = array(
+		'merchants_id' => $product['id'],
+		'name' => $product['name'],
+		'gtin' => $product['barcode'],
+		'weight' => $product['weight'],
+		'dimensions' => array($product['width'], $product['height'], $product['length'])
+	    );
+
+	    $results[] = $this->doPost($this->apiUrl . 'products/', $productData);
+	}
+
+	return $results;
+    }
+
+    /**
+     * Update products to Logitrail's system.
+     * Updatess all products that were added with addProduct method and returns
+     * array of responses from Logitrail.
+     *
+     * Products are matched for updating by id.
+     *
+     * @return array Responses from Logitrail for each added product
+     */
+    public function updateProducts() {
+         // Convenience function to keep method naming logical
+	 // Create and update go to same endpoint in Logitrail and work the same way
+
+	return $this->createProducts();
+    }
+
+    /**
+     * Remove products from the instance
+     */
+    public function clearProducts() {
+	$this->products = array();
+    }
+
+    /**
+     * Remove customer info from the instance
+     */
+    public function clearCustomerInfo() {
+        $this->firstName = null;
+        $this->lastName = null;
+        $this->address = null;
+        $this->postalCode = null;
+        $this->city = null;
+	$this->phone = null;
+	$this->email = null;
+    }
+
+    /**
+     * Remove order id from instance
+     */
+    public function clearOrderId() {
+	$this->orderId = null;
+    }
+
+    /**
+     * Remove customer info, order id and products from the instance
+     */
+    public function clearAll() {
+	$this->clearCustomerInfo();
+	$this->clearOrderId();
+	$this->clearProducts();
+    }
+
+
+
+    /**
      * Does a post call to Logireail's system to given endpoint with optional payload
      *
      * @param string $url URL of the endpoint to post to
      * @param array $data Data sent as JSON payload
-     * @return JSON?
+     * @return JSON The response resturned by Logitrail
      */
     private function doPost($url, $data = false) {
         // TODO: Check that merchId and secret are set
