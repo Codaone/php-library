@@ -21,8 +21,8 @@ class ApiClient {
     private $testCheckoutUrl = 'http://checkout.test.logitrail.com/go';
     private $testApiUrl = 'http://api-1.test.logitrail.com/2015-01-01/';
 
-    private $prodCheckoutUrl = 'http://checkout.logitrail.com/go';
-    private $prodApiUrl = 'http://api-1.logitrail.com/2015-01-01/';
+    private $prodCheckoutUrl = 'https://checkout.logitrail.com/go';
+    private $prodApiUrl = 'https://api-1.logitrail.com/2015-01-01/';
 
     private $checkoutUrl = 'http://checkout.logitrail.com/go';
     private $apiUrl = 'http://api-1.logitrail.com/2015-01-01/';
@@ -48,7 +48,7 @@ class ApiClient {
      * Return Logitrail responses raw as gotten or converted to array
      * (Doesn't always return JSON in error cases, so converted responses may vary)
      * Default false (returns converted array)
-     * 
+     *
      * @param bool $responseAsRaw
      */
     public function setResponseAsRaw($responseAsRaw) {
@@ -272,8 +272,8 @@ class ApiClient {
         $this->address = null;
         $this->postalCode = null;
         $this->city = null;
-	$this->phone = null;
-	$this->email = null;
+		$this->phone = null;
+		$this->email = null;
     }
 
     /**
@@ -287,9 +287,9 @@ class ApiClient {
      * Remove customer info, order id and products from the instance
      */
     public function clearAll() {
-	$this->clearCustomerInfo();
-	$this->clearOrderId();
-	$this->clearProducts();
+		$this->clearCustomerInfo();
+		$this->clearOrderId();
+		$this->clearProducts();
     }
 
 
@@ -302,33 +302,34 @@ class ApiClient {
      * @return array The response resturned by Logitrail
      */
     private function doPost($url, $data = false) {
-	if(!$this->merchantId || !$this->secretKey) {
-	    throw new Exception('Missing merchant id or secret key');
-	}
+		if(!$this->merchantId || !$this->secretKey) {
+			throw new Exception('Missing merchant id or secret key');
+		}
 
-        $auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
-        $ch = curl_init($url);
+		$auth = 'M-' . $this->merchantId . ':' . $this->secretKey;
+		$ch = curl_init($url);
 
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD, $auth);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+		curl_setopt($ch, CURLOPT_USERPWD, $auth);
 
-        if(is_array($data)) {
-            $postData = json_encode($data);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($postData))
-            );
+		if(is_array($data)) {
+			$postData = json_encode($data);
+			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+				'Content-Type: application/json',
+				'Content-Length: ' . strlen($postData))
+			);
 
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-        }
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+		}
 
-        $response = curl_exec($ch);
+		$response = curl_exec($ch);
 
-        curl_close($ch);
+		curl_close($ch);
 
-        return ($this->responseAsRaw ? $response : json_decode($response, true));
+		return ($this->responseAsRaw ? $response : json_decode($response, true));
     }
 
     /**
@@ -340,22 +341,22 @@ class ApiClient {
      * @return string
      */
     private function calculateMac($requestValues, $secretKey) {
-        ksort($requestValues);
+		ksort($requestValues);
 
-        $macValues = [];
-        foreach ($requestValues as $key => $value) {
-            if ($key === 'mac') {
-                continue;
-            }
-            $macValues[] = $value;
-        }
+		$macValues = [];
+		foreach ($requestValues as $key => $value) {
+			if ($key === 'mac') {
+				continue;
+			}
+			$macValues[] = $value;
+		}
 
-        $macValues[] = $secretKey;
+		$macValues[] = $secretKey;
 
-        $macSource = join('|', $macValues);
+		$macSource = join('|', $macValues);
 
-        $correctMac = base64_encode(hash('sha512', $macSource, true));
+		$correctMac = base64_encode(hash('sha512', $macSource, true));
 
-        return $correctMac;
+		return $correctMac;
     }
 }
