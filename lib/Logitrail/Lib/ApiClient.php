@@ -363,4 +363,23 @@ class ApiClient {
 
 		return $correctMac;
     }
+
+    /**
+     * Processes json string and returns an associative array, returns empty array on json parse error
+     * @param string $json returned by logitrail webhook
+     * @return array
+     */
+    public function processWebhookData($json) {
+        $parsed = array();
+        $decoded = json_decode($json, true);
+        if ($decoded) {
+            $parsed['event_id']    = $decoded['event_id'];
+            $parsed['webhook_id']  = $decoded['webhook_id'];
+            $parsed['event_type']  = $decoded['event_type'];
+            $parsed['ts']          = strtotime($decoded['ts']);
+            $parsed['retry_count'] = (int)$decoded['retry_count'];
+            $parsed['payload']     = $decoded['payload'];
+        }
+        return $parsed;
+    }
 }
