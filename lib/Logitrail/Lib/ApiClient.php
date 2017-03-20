@@ -189,7 +189,7 @@ class ApiClient {
 	 * Updates data for order already in Logitrail's system.
 	 *
 	 * @param string $logitrailOrderId
-	 * @return array The response resturned by Logitrail
+	 * @return array The response returned by Logitrail
 	 */
 	public function updateOrder($logitrailOrderId) {
 		// TODO: Check that all mandatory values are given
@@ -215,7 +215,7 @@ class ApiClient {
 	 * Confirm a passive order reported earlier for delivery
 	 *
 	 * @param string $logitrailOrderId
-	 * @return array The response resturned by Logitrail
+	 * @return array The response returned by Logitrail
 	 */
 	public function confirmOrder($logitrailOrderId) {
 		return $this->doPost($this->apiUrl . 'orders/' . $logitrailOrderId . '/_confirm');
@@ -307,11 +307,11 @@ class ApiClient {
 	 * Does a post call to Logireail's system to given endpoint with optional payload
 	 *
 	 * @param string     $url  URL of the endpoint to post to
-	 * @param array|bool $data Data sent as JSON payload
-	 * @return array The response resturned by Logitrail
+	 * @param array $data Data sent as JSON payload
+	 * @return array The response returned by Logitrail
 	 * @throws \Exception
 	 */
-	private function doPost($url, $data = FALSE) {
+	private function doPost($url, $data = array()) {
 		if (!$this->merchantId || !$this->secretKey) {
 			throw new \Exception('Missing merchant id or secret key');
 		}
@@ -325,7 +325,7 @@ class ApiClient {
 		curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 		curl_setopt($ch, CURLOPT_USERPWD, $auth);
 
-		if (is_array($data)) {
+		if ($data) {
 			$postData = json_encode($data);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 					'Content-Type: application/json',
