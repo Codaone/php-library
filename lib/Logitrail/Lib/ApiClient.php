@@ -311,7 +311,7 @@ class ApiClient {
 	 * @return array The response returned by Logitrail
 	 * @throws \Exception
 	 */
-	private function doPost($url, $data = array()) {
+	private function doPost($url, array $data = array()) {
 		if (!$this->merchantId || !$this->secretKey) {
 			throw new \Exception('Missing merchant id or secret key');
 		}
