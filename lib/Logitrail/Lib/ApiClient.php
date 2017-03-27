@@ -290,6 +290,7 @@ class ApiClient {
 		$this->city        = NULL;
 		$this->phone       = NULL;
 		$this->email       = NULL;
+		$this->companyName = NULL;
 		$this->countryCode = NULL;
 	}
 
