@@ -15,6 +15,7 @@ class ApiClient {
 	private $email;
 	private $phone;
 	private $companyName;
+	private $countryCode;
 	private $products = array();
 
 	private $responseAsRaw = FALSE;
@@ -124,8 +125,9 @@ class ApiClient {
 	 * @param string $postalCode
 	 * @param string $city
 	 * @param string $companyName
+	 * @param string $countryCode ISO 3166 standard see https://en.wikipedia.org/wiki/ISO_3166
 	 */
-	public function setCustomerInfo($firstname, $lastname, $phone, $email, $address, $postalCode, $city, $companyName) {
+	public function setCustomerInfo($firstname, $lastname, $phone, $email, $address, $postalCode, $city, $companyName, $countryCode = 'FI') {
 		$this->firstName   = $firstname;
 		$this->lastName    = $lastname;
 		$this->address     = $address;
@@ -134,6 +136,7 @@ class ApiClient {
 		$this->phone       = $phone;
 		$this->email       = $email;
 		$this->companyName = $companyName;
+		$this->countryCode = $countryCode;
 	}
 
 	/**
@@ -147,17 +150,18 @@ class ApiClient {
 		// TODO: Check that all mandatory values are set
 		$post = array();
 
-		$post['merchant']       = $this->merchantId;
-		$post['request']        = 'new_order';
-		$post['order_id']       = $this->orderId; // Merchant's own ID for the order.
-		$post['customer_fn']    = $this->firstName;
-		$post['customer_ln']    = $this->lastName;
-		$post['customer_addr']  = $this->address;
-		$post['customer_pc']    = $this->postalCode;
-		$post['customer_city']  = $this->city;
-		$post['customer_email'] = $this->email;
-		$post['customer_phone'] = $this->phone;
-		$post['language']       = $lang;
+		$post['merchant']         = $this->merchantId;
+		$post['request']          = 'new_order';
+		$post['order_id']         = $this->orderId; // Merchant's own ID for the order.
+		$post['customer_fn']      = $this->firstName;
+		$post['customer_ln']      = $this->lastName;
+		$post['customer_addr']    = $this->address;
+		$post['customer_pc']      = $this->postalCode;
+		$post['customer_city']    = $this->city;
+		$post['customer_country'] = $this->countryCode;
+		$post['customer_email']   = $this->email;
+		$post['customer_phone']   = $this->phone;
+		$post['language']         = $lang;
 
 		// add products to post data
 		foreach ($this->products as $id => $product) {
@@ -204,7 +208,8 @@ class ApiClient {
 				'address'          => $this->address,
 				'city'             => $this->city,
 				'postalCode'       => $this->postalCode,
-				'organizationName' => $this->companyName
+				'organizationName' => $this->companyName,
+				'countryCode'      => $this->countryCode
 			)
 		);
 
@@ -278,13 +283,14 @@ class ApiClient {
 	 * Remove customer info from the instance
 	 */
 	public function clearCustomerInfo() {
-		$this->firstName  = NULL;
-		$this->lastName   = NULL;
-		$this->address    = NULL;
-		$this->postalCode = NULL;
-		$this->city       = NULL;
-		$this->phone      = NULL;
-		$this->email      = NULL;
+		$this->firstName   = NULL;
+		$this->lastName    = NULL;
+		$this->address     = NULL;
+		$this->postalCode  = NULL;
+		$this->city        = NULL;
+		$this->phone       = NULL;
+		$this->email       = NULL;
+		$this->countryCode = NULL;
 	}
 
 	/**
