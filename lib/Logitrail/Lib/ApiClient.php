@@ -146,7 +146,7 @@ class ApiClient {
 	 * @param string $lang
 	 * @return string
 	 */
-	public function getForm($lang = 'fi') {
+	public function getForm($lang = 'fi', $fields = array()) {
 		// TODO: Check that all mandatory values are set
 		$post = array();
 
@@ -163,6 +163,10 @@ class ApiClient {
 		$post['customer_phone']   = $this->phone;
 		$post['language']         = $lang;
 
+                foreach ($fields as $field => $value) {
+                    $post[$field] = $value;
+                }
+		
 		// add products to post data
 		foreach ($this->products as $id => $product) {
 			$post['products_' . $id . '_id']     = $product['id'];
